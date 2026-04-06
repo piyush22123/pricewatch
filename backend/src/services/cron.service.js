@@ -12,8 +12,16 @@ const startCronJob = () => {
         const products = await productModel.find();
 
         const browser = await puppeteer.launch({
-            headless: true, // change to false for testing
-            args: ["--no-sandbox", "--disable-setuid-sandbox"]
+        headless: true,
+        args: [
+            "--no-sandbox",
+            "--disable-setuid-sandbox",
+            "--disable-dev-shm-usage",
+            "--disable-gpu",
+            "--no-first-run",
+            "--no-zygote",
+            "--single-process"
+        ]
         });
 
 
