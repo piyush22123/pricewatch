@@ -1,30 +1,39 @@
-const puppeteer = require("puppeteer");
+const axios = require("axios");
+const cheerio = require("cheerio");
 
-const scrapeAmazonProduct = async (page, url) => {
+const scrapeAmazonProduct = async (url) => {
     try {
         if (!url || !url.startsWith("http")) {
             throw new Error("Invalid URL");
         }
 
-        await page.setExtraHTTPHeaders({
-            "accept-language": "en-US,en;q=0.9",
+        const { data } = await axios.get(url, {
+            headers: {
+                "User-Agent":
+                    "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 Chrome/120 Safari/537.36",
+                "Accept-Language": "en-US,en;q=0.9",
+            },
         });
 
-        await page.goto(url, {
-            waitUntil: "networkidle2",
-            timeout: 60000
-        });
+        const $ = cheerio.load(data);
 
-        await page.waitForSelector("#productTitle", { timeout: 15000 });
+        // ✅ Title
+        const title = $("#productTitle").text().trim();
 
-        const title = await page.$eval("#productTitle", el => el.innerText.trim());
+        // ✅ Price (handles multiple cases)
+        let priceRaw =
+            $(".a-price .a-offscreen").first().text() ||
+            $("#priceblock_ourprice").text() ||
+            $("#priceblock_dealprice").text();
 
-        const priceRaw = await page.$eval(".a-price .a-offscreen", el => el.innerText);
+        if (!priceRaw) {
+            throw new Error("Price not found");
+        }
 
         const price = parseInt(
-        priceRaw
-            .replace(/[^0-9.]/g, "")  // keep digits + dot
-            .split(".")[0]            // remove decimal part
+            priceRaw
+                .replace(/[^0-9.]/g, "")
+                .split(".")[0]
         );
 
         return { title, price };

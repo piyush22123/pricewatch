@@ -1,42 +1,20 @@
 const productModel = require("../models/product.model.js");
 const { scrapeAmazonProduct } = require("../services/scraper.service");
 
-const puppeteer = require("puppeteer");
 
 const addProduct = async (req, res) => {
-    let browser;
-
     try {
         const { productUrl, targetPrice } = req.body;
         const userId = req.user.id;
-
-        console.log("Starting Puppeteer...");
-
-        browser = await puppeteer.launch({
-            headless: true,
-            args: [
-                "--no-sandbox",
-                "--disable-setuid-sandbox",
-                "--disable-dev-shm-usage",
-                "--disable-gpu"
-            ]
-        });
-
-        const page = await browser.newPage();
 
         let url = productUrl;
         if (!url.startsWith("http")) {
             url = "https://" + url;
         }
 
-        console.log("Opening URL:", url);
+        console.log("Scraping URL:", url);
 
-        await page.goto(url, {
-            waitUntil: "domcontentloaded",
-            timeout: 60000
-        });
-
-        const scrapedData = await scrapeAmazonProduct(page, url);
+        const scrapedData = await scrapeAmazonProduct(url);
 
         if (!scrapedData) {
             return res.status(400).json({
@@ -50,7 +28,7 @@ const addProduct = async (req, res) => {
             productUrl,
             title,
             currentPrice: price,
-            targetPrice: Number(targetPrice), // ✅ FIX
+            targetPrice: Number(targetPrice),
             user: userId
         });
 
@@ -60,12 +38,12 @@ const addProduct = async (req, res) => {
         });
 
     } catch (err) {
-        console.error("ADD PRODUCT ERROR:", err); // 🔥 VERY IMPORTANT
+        console.error("ADD PRODUCT ERROR:", err);
         res.status(500).json({ error: err.message });
-    } finally {
-        if (browser) await browser.close(); // ✅ prevent crash
     }
 };
+
+
 
 
 const getProduct = async (req, res) => {
