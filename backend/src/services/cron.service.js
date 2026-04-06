@@ -6,22 +6,19 @@ const { scrapeAmazonProduct } = require("./scraper.service");
 const { sendEmail } = require("./email.service");
 
 const startCronJob = () => {
-    cron.schedule("0 */6 * * * *", async () => {
+    cron.schedule("0 */6 * * *", async () => {
         console.log("⏰ Running price check...");
 
         const products = await productModel.find();
 
         const browser = await puppeteer.launch({
-        headless: true,
-        args: [
-            "--no-sandbox",
-            "--disable-setuid-sandbox",
-            "--disable-dev-shm-usage",
-            "--disable-gpu",
-            "--no-first-run",
-            "--no-zygote",
-            "--single-process"
-        ]
+            headless: true,
+            args: [
+                "--no-sandbox",
+                "--disable-setuid-sandbox",
+                "--disable-dev-shm-usage",
+                "--disable-gpu"
+            ]
         });
 
 
