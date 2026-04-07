@@ -116,15 +116,22 @@ const Home = () => {
         </div>
 
         {/* Cards */}
-        <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
-          {products.map((p) => (
-            <ProductCard
-              key={p._id}
-              product={p}
-              onDelete={handleDelete}
-            />
-          ))}
-        </div>
+        {
+          products.length === 0 ? (
+            <div className="flex items-center justify-center"><img className="w-40 h-40" src="noproducts.png" alt="" /></div>
+            
+          ) : (
+            <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
+              {products.map((p) => (
+                <ProductCard
+                  key={p._id}
+                  product={p}
+                  onDelete={handleDelete}
+                />
+              ))}
+            </div>
+          )
+        }
       </div>
     </div>
   );
